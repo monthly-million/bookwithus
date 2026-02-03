@@ -134,7 +134,7 @@ function App() {
             <img src={detailSectionImg1} />
             <Stack gap={1.5}>
               <Typography fontWeight={700} fontSize={'24px'} fontFamily={'Bookk Myungjo'} textAlign={'center'} sx={{color: '#171917'}}>가볍지 않은 진지한 만남</Typography>
-              <Typography fontWeight={400} fontSize={'16px'} fontFamily={'Pretendard'} textAlign={'center'} sx={{color: '#3B3D3B', lineHeight: '1.3'}}>가벼운 만남보다, 책 한 권을<br/> 함계이야기할 수 있는 인연</Typography>
+              <Typography fontWeight={400} fontSize={'16px'} fontFamily={'Pretendard'} textAlign={'center'} sx={{color: '#3B3D3B', lineHeight: '1.3'}}>가벼운 만남보다, 책 한 권을<br/> 함께이야기할 수 있는 인연</Typography>
             </Stack>
           </Card>
           <Card className="detail-section-card">
