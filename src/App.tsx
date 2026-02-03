@@ -100,7 +100,7 @@ function App() {
       
 
       {/* hero section */}
-      <Sheet className='section' sx={{backgroundColor: '#E7F3BE', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+      <Sheet className='section' sx={{backgroundColor: '#746265', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         {/* header */}
         <Sheet className='section' sx={{color: '#fff', position: 'absolute', top: 0, zIndex: 100, width: '100%', backgroundColor: 'transparent'}}>
           <Stack padding={2} direction={'row'} alignItems={'center'} justifyContent={'space-between'} sx={{boxSizing: 'border-box'}}>
