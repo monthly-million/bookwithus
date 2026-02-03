@@ -1,0 +1,14 @@
+.section > * {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.detail-section-card {
+  border-radius: 20px !important;
+  border: none !important;
+  box-shadow: 4px 4px 14px 0 rgba(0, 0, 0, 0.1) !important;
+  padding: 30px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
