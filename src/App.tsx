@@ -8,21 +8,81 @@ import guideSectionImg1 from './assets/images/mockup_1.png';
 import guideSectionImg2 from './assets/images/mockup_2.png';
 import guideSectionImg3 from './assets/images/mockup_3.png';
 import guideSectionImg4 from './assets/images/mockup_4.png';
+import * as amplitude from '@amplitude/analytics-browser';
+import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
 import { Modal } from './component/Modal'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 function App() {
 
+  const LOCAL_STORAGE_KEY = 'user_id';
+  const AMPLITUDE_KEY = '064783e4cccb3d0b13c11e42bea626';
+  // open modal
   const [isOpen, setIsOpen] = useState(true);
   const [isOpenDownload, setIsOpenDownload] = useState(false);
 
+  // gender and age
+  const [gender, setGender] = useState<string>('female');
+  const [age, setAge] = useState<number | null>(null);
+
+  // phone number
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+
+  // session replay plugin
+  const replayPlugin = sessionReplayPlugin({
+    sampleRate: 0.1, // 10% 녹화 (운영에서는 보통 낮춤)
+  });
+  const userId = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  useEffect(() => {
+    amplitude.add(replayPlugin);
+
+    const amplitudeId = userId || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(LOCAL_STORAGE_KEY, amplitudeId);
+
+    amplitude.init(AMPLITUDE_KEY, amplitudeId, {
+      defaultTracking: {
+        pageViews: true,
+        sessions: true,
+        attribution: true
+      }
+    });
+  }, []);
+
   const getInfo = () => {
+    if (!gender || !age) return alert('성별과 연령대를 선택해주세요.');
+    amplitude.track('성별연령_선택완료', {
+      gender: gender,
+      age: age
+    });
     setIsOpen(false);
+  }
+
+  const clickDownloadButton = (buttonLocation: string) => {
+    setIsOpenDownload(true);
+    amplitude.track('앱다운로드_클릭', {
+      button: buttonLocation
+    });
+  }
+
+  const clickNotificationSignup = () => {
+    if (!phoneNumber) return alert('휴대폰번호를 입력해주세요.');
+    if (phoneNumber.length !== 11) return alert('휴대폰번호를 11자리로 입력해주세요.');
+    amplitude.track('휴대폰번호_완료', {
+      phone: phoneNumber
+    });
+    setIsOpenDownload(false);
+    alert('신청이 완료되었습니다.');
+  }
+
+  const justTakeALook = () => {
+    amplitude.track('휴대폰번호_둘러볼게요');
+    setIsOpenDownload(false);
   }
 
   return (
     <Stack>
-      {isOpen && 
+      {isOpen && !userId &&
         <Modal>
           <Stack gap={1.5}>
             <Stack>
@@ -38,14 +98,14 @@ function App() {
             <Stack gap={2}>
               <Stack gap={1}>
                 <Typography fontWeight={600} fontSize={'18px'}>성별</Typography>
-                <RadioGroup defaultValue="female" orientation="horizontal" sx={{display: 'flex'}}>
+                <RadioGroup value={gender} onChange={(e) => setGender(e.target.value)} orientation="horizontal" sx={{display: 'flex'}}>
                   <Radio value="female" label="여자" sx={{flex: 1}}/>
                   <Radio value="male" label="남자" sx={{flex: 1}}/>
                 </RadioGroup>
               </Stack>
               <Stack gap={1}>
                 <Typography fontWeight={600} fontSize={'18px'}>태어난 해</Typography>
-                <Select placeholder="태어난 해를 선택해주세요">
+                <Select placeholder="태어난 해를 선택해주세요" value={age} onChange={(_, newValue) => setAge(newValue)}>
                   {
                     Array.from({length: 38}, (_, index) => (
                       <Option value={2007 - index}>{2007 - index}</Option>
@@ -86,13 +146,13 @@ function App() {
             </Stack>
             <Stack gap={1} sx={{marginTop: '1rem'}}>
               <Typography fontWeight={600} fontSize={'17px'}>전화번호 <span style={{color: '#A6A6A6', fontWeight: 400}}>(문자발송)</span></Typography>
-              <Input placeholder='`-`없이 숫자만 입력해주세요.' sx={{height: '50px'}} />
+              <Input placeholder='`-`없이 숫자만 입력해주세요.' sx={{height: '50px'}} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
               <Typography fontWeight={400} fontSize={'14px'}>💡 알림은 편하게 받아보실 수 있게 보내드릴게요.<br />‘소개팅’ 같은 부담스러운 표현은 사용하지 않아요.</Typography>
             </Stack>
           </Stack>
           <Stack gap={1} sx={{marginTop: '1rem'}}>
-            <Button sx={{backgroundColor: '#746265', color: '#fff', height: '50px', fontWeight: '500', fontSize: '18px'}} onClick={getInfo}>오픈 알림 받기</Button>
-            <Button sx={{backgroundColor: '#fff', color: '#746265', height: '50px', fontWeight: '500', fontSize: '18px', border: '1px solid #746265'}} onClick={() => setIsOpenDownload(false)}>그냥 둘러볼게요</Button>
+            <Button sx={{backgroundColor: '#746265', color: '#fff', height: '50px', fontWeight: '500', fontSize: '18px'}} onClick={clickNotificationSignup}>오픈 알림 받기</Button>
+            <Button sx={{backgroundColor: '#fff', color: '#746265', height: '50px', fontWeight: '500', fontSize: '18px', border: '1px solid #746265'}} onClick={justTakeALook}>그냥 둘러볼게요</Button>
           </Stack>
         </Modal>
       }
@@ -108,7 +168,7 @@ function App() {
               Book
               <span style={{fontFamily: 'Bodoni Moda', fontSize: '12px', fontWeight: '400', padding: '2.38px 7.15px', backgroundColor: '#FDFDFD', borderRadius: '119.23px', color: '#171917', boxSizing: 'border-box', marginLeft: '2px'}}>with us</span>
             </Typography>
-            <Button sx={{borderRadius: '100px', background: '#FDFDFD', fontWeight: '600', fontSize: '14px', color: '#533424'}} onClick={() => setIsOpenDownload(true)}>앱 다운로드</Button>
+            <Button sx={{borderRadius: '100px', background: '#FDFDFD', fontWeight: '600', fontSize: '14px', color: '#533424'}} onClick={() => clickDownloadButton('up')}>앱 다운로드</Button>
           </Stack>
         </Sheet>
         
@@ -205,7 +265,7 @@ function App() {
             맞는 사람을 만나고 대화를 이어가세요.
           </Typography>
         </Stack>
-        <Button onClick={() => setIsOpenDownload(true)} sx={{backgroundColor: '#000', color: '#fff', height: '58px', width: '260px', borderRadius: '100px', fontWeight: '500', fontSize: '20px', fontFamily: 'Pretendard'}}>
+        <Button onClick={() => clickDownloadButton('down')} sx={{backgroundColor: '#000', color: '#fff', height: '58px', width: '260px', borderRadius: '100px', fontWeight: '500', fontSize: '20px', fontFamily: 'Pretendard'}}>
           앱 다운로드
         </Button>
       </Sheet>
